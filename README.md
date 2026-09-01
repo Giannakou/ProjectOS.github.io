@@ -1,4 +1,5 @@
-# Έβαλα τα παραπάνω functions στο app.js ανάμεσα στα resetToSample() και το wipeall() στην γραμμή 290
+# Αλλαγές που θα κάνω στο αρχείο ως branch:
+1. *Έβαλα τα παραπάνω functions στο app.js ανάμεσα στα resetToSample() και το wipeall() στην γραμμή 290*
 function exportData() {
   const dataStr = JSON.stringify(STATE, null, 2);
   const blob = new Blob([dataStr], { type: 'application/json' });
