@@ -1,0 +1,629 @@
+/* =========================================================================
+   BusinessOS — Owner Cockpit
+   styles.css — MOBILE-FIRST εκδοχή.
+
+   Φιλοσοφία: όλοι οι κανόνες ΧΩΡΙΣ media query παρακάτω είναι σχεδιασμένοι
+   για μικρή, κάθετη (κινητό) οθόνη. Στο τέλος του αρχείου υπάρχει ΕΝΑ
+   ενιαίο block `@media (min-width: 860px)` που "αναβαθμίζει" το layout σε
+   desktop/tablet εμφάνιση (sidebar, πίνακες αντί για κάρτες, modal στο
+   κέντρο, κ.λπ.). Αυτό είναι το αντίθετο από το παλιό αρχείο, που έγραφε
+   πρώτα desktop CSS και μετά "διόρθωνε" για mobile με max-width query.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg: #0D1316;
+  --bg-panel: #131B1F;
+  --bg-elevated: #1B262B;
+  --bg-hover: #223037;
+  --border: #263238;
+  --border-soft: #1D2A2F;
+  --text: #E7EEEF;
+  --text-dim: #92A5AB;
+  --text-faint: #5C6E74;
+  --amber: #E8A33D;
+  --amber-dim: #4A3A1E;
+  --teal: #4FB0A0;
+  --teal-dim: #1B3833;
+  --coral: #E2694B;
+  --coral-dim: #402420;
+  --blue: #5B8DEF;
+  --blue-dim: #1C2A42;
+  --radius: 10px;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* --- Νέα: διαστάσεις για το mobile chrome (bottom nav + safe area) --- */
+  --bottom-nav-h: 60px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --desktop-bp: 860px; /* το breakpoint όπου περνάμε σε tablet/desktop layout */
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+html,body{height:100%;}
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  /* αποφεύγουμε το "μπάουνσινγκ" overscroll να δείχνει λευκό background σε iOS */
+  overscroll-behavior-y: none;
+}
+body::before{
+  content:"";
+  position: fixed; inset:0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.025) 1px, transparent 0);
+  background-size: 22px 22px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+a{color: inherit;}
+button{font-family: inherit; cursor:pointer;}
+input, select, textarea{font-family: inherit; font-size: 13px;}
+/* Στο iOS, αν ένα input έχει font-size < 16px, το Safari κάνει αυτόματο zoom
+   όταν εστιάζεις πάνω του. Το αποτρέπουμε δίνοντας 16px στα text inputs. */
+.field input, .field select, .field textarea, .search-input, .checklist-add input{
+  font-size: 16px;
+}
+
+/* =========================================================================
+   ΒΑΣΙΚΟ LAYOUT — mobile πρώτα (μονή στήλη, χωρίς πλευρικό sidebar)
+   ========================================================================= */
+#app{
+  display:flex; flex-direction:column;
+  min-height:100vh; position:relative; z-index:1;
+}
+
+/* Το sidebar (desktop navigation) είναι ΚΡΥΦΟ by default στο mobile —
+   αντικαθίσταται εκεί από το .bottom-nav. Ξαναεμφανίζεται στο desktop
+   media query στο τέλος του αρχείου. */
+.sidebar{
+  display:none;
+  width: 232px;
+  flex-shrink:0;
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border-soft);
+  flex-direction:column;
+  position: sticky; top:0; height:100vh;
+}
+.brand{
+  padding: 20px 18px 16px 18px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.brand .mark{
+  display:flex; align-items:center; gap:9px;
+}
+.brand .dot{
+  width:9px; height:9px; border-radius:2px;
+  background: var(--amber);
+  box-shadow: 0 0 10px rgba(232,163,61,0.7);
+  transform: rotate(45deg);
+}
+.brand .name{
+  font-family: var(--font-display);
+  font-weight:700; font-size:16.5px;
+  letter-spacing: 0.2px;
+}
+.brand .sub{
+  margin-top:5px;
+  font-size: 10.5px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.nav{ flex:1; overflow-y:auto; padding: 10px 10px; }
+.nav-group{ margin-bottom: 14px; }
+.nav-group-label{
+  font-size: 10px; font-family: var(--font-mono);
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 6px 10px 4px 10px;
+}
+.nav-item{
+  display:flex; align-items:center; gap:10px;
+  padding: 10px 10px; border-radius: 7px;
+  font-size: 13.2px; color: var(--text-dim);
+  cursor:pointer; user-select:none;
+  border: 1px solid transparent;
+  transition: background .12s, color .12s;
+  min-height: 40px; /* touch-friendly ύψος */
+}
+.nav-item:hover{ background: var(--bg-hover); color: var(--text); }
+.nav-item.active{
+  background: var(--bg-elevated);
+  color: var(--text);
+  border-color: var(--border);
+}
+.nav-item.active .nav-ico{ color: var(--amber); }
+.nav-ico{
+  width:16px; text-align:center; flex-shrink:0;
+  color: var(--text-faint);
+  font-family: var(--font-mono); font-size:12px;
+}
+.nav-badge{
+  margin-left:auto;
+  font-family: var(--font-mono); font-size: 10.5px;
+  color: var(--text-faint);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px; padding: 1px 7px;
+}
+.nav-badge.hot{ color: var(--amber); border-color: var(--amber-dim); background: rgba(232,163,61,0.08); }
+
+.sidebar-foot{
+  padding: 12px 16px 16px 16px;
+  border-top: 1px solid var(--border-soft);
+  font-size: 11px; color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+.sidebar-foot button{
+  background:none; border:none; color: var(--text-faint);
+  font-family: var(--font-mono); font-size: 10.5px;
+  text-decoration: underline; text-underline-offset:2px;
+  padding:0; margin-top:6px;
+}
+.sidebar-foot button:hover{ color: var(--coral); }
+
+.main{ flex:1; min-width:0; display:flex; flex-direction:column; }
+
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  background: linear-gradient(180deg, rgba(19,27,31,0.6), transparent);
+  position: sticky; top:0; z-index:5;
+  backdrop-filter: blur(6px);
+}
+.topbar h1{
+  font-family: var(--font-display);
+  font-size: 18px; font-weight:600;
+}
+.topbar .breadcrumb{
+  font-size: 10.5px; color: var(--text-faint);
+  font-family: var(--font-mono); letter-spacing:0.5px;
+  text-transform: uppercase; margin-bottom:3px;
+}
+.topbar-right{ display:flex; align-items:center; gap:14px; }
+.clock{
+  font-family: var(--font-mono); font-size:11px; color: var(--text-dim);
+  text-align:right;
+}
+.clock .d1{ color: var(--text); }
+
+/* Το content έχει κάτω padding όσο το ύψος του bottom nav + η "ασφαλής"
+   περιοχή της συσκευής (π.χ. το home-indicator στα iPhone), ώστε το
+   τελευταίο στοιχείο της σελίδας να μη κρύβεται πίσω από τη μπάρα. */
+.content{
+  padding: 16px 14px calc(var(--bottom-nav-h) + var(--safe-b) + 24px) 14px;
+  flex: 1;
+}
+
+/* =========================================================================
+   BOTTOM NAVIGATION BAR — το βασικό μενού πλοήγησης στο κινητό
+   ========================================================================= */
+.bottom-nav{
+  position: fixed; left:0; right:0; bottom:0; z-index:60;
+  display:flex;
+  background: var(--bg-panel);
+  border-top: 1px solid var(--border-soft);
+  padding-bottom: var(--safe-b); /* iOS home-indicator safe area */
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.35);
+}
+.bn-item{
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; padding: 8px 4px 7px 4px; min-height:56px;
+  color: var(--text-faint); position:relative;
+  border:none; background:none; cursor:pointer;
+}
+.bn-item .bn-ico{ font-family: var(--font-mono); font-size:15px; line-height:1; }
+.bn-item .bn-label{ font-size:10px; font-weight:500; letter-spacing:0.2px; }
+.bn-item.active{ color: var(--amber); }
+.bn-item .bn-dot{
+  position:absolute; top:6px; right:calc(50% - 16px);
+  min-width:14px; height:14px; padding:0 3px; border-radius:20px;
+  background: var(--coral); color:#1A0B08;
+  font-family: var(--font-mono); font-size:9px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+}
+
+/* "Περισσότερα" — bottom sheet με τις υπόλοιπες ενότητες που δεν χωράνε
+   στην κύρια μπάρα (ίδιο concept με τα groups του παλιού sidebar). */
+.more-sheet-backdrop{
+  position: fixed; inset:0; background: rgba(6,9,10,0.72);
+  z-index:90; display:flex; align-items:flex-end; justify-content:center;
+  backdrop-filter: blur(2px);
+}
+.more-sheet{
+  width:100%; max-width:560px;
+  background: var(--bg-panel); border:1px solid var(--border); border-bottom:none;
+  border-radius: 16px 16px 0 0;
+  padding: 8px 8px calc(var(--safe-b) + 10px) 8px;
+  max-height: 78vh; overflow-y:auto;
+}
+.more-sheet-handle{ width:36px; height:4px; background:var(--border); border-radius:4px; margin: 6px auto 10px auto; }
+.more-sheet .nav-group{ padding: 0 8px; }
+.more-sheet .nav-item{ font-size:14px; }
+.more-sheet-foot{
+  margin-top:8px; padding: 12px 16px 4px 16px;
+  border-top:1px solid var(--border-soft);
+  font-size:11px; color:var(--text-faint); font-family:var(--font-mono);
+}
+.more-sheet-foot button{
+  background:none; border:none; color: var(--text-faint);
+  font-family: var(--font-mono); font-size: 10.5px;
+  text-decoration: underline; text-underline-offset:2px;
+  padding:0; margin-top:6px; margin-right:12px;
+}
+.more-sheet-foot button:hover{ color: var(--coral); }
+
+/* ---------- HUD strip (dashboard signature) ---------- */
+.hud{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:1px;
+  background: var(--border-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  overflow:hidden;
+  margin-bottom: 18px;
+}
+.hud-cell{
+  background: var(--bg-panel);
+  padding: 14px 14px;
+  position: relative;
+}
+.hud-cell .hl{
+  font-size: 10px; color: var(--text-faint);
+  font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px;
+  display:flex; align-items:center; gap:6px;
+}
+.hud-cell .hv{
+  font-family: var(--font-display); font-size: 22px; font-weight:700;
+  margin-top: 6px;
+}
+.hud-cell .hs{
+  font-size: 10.5px; color: var(--text-faint); margin-top:3px;
+}
+.hud-tick{
+  position:absolute; left:0; top:0; bottom:0; width:3px;
+}
+.hud-tick.amber{ background: var(--amber); }
+.hud-tick.teal{ background: var(--teal); }
+.hud-tick.coral{ background: var(--coral); }
+.hud-tick.blue{ background: var(--blue); }
+
+/* ---------- generic panel/card ---------- */
+.panel{
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  overflow:hidden;
+}
+.panel-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.panel-head h2{
+  font-family: var(--font-display); font-size:14.5px; font-weight:600;
+}
+.panel-head .count{
+  font-family: var(--font-mono); color: var(--text-faint); font-size:11.5px;
+}
+.panel-body{ padding: 6px 0; }
+.panel-body.pad{ padding: 16px 16px; }
+.panel-empty{
+  padding: 26px 18px; text-align:center; color: var(--text-faint); font-size:12.5px;
+}
+
+.grid2{ display:grid; grid-template-columns: 1fr; gap: 16px; align-items:start; }
+.grid3{ display:grid; grid-template-columns: 1fr; gap: 16px; align-items:start; }
+
+/* =========================================================================
+   ΠΙΝΑΚΕΣ → ΚΑΡΤΕΣ σε mobile
+   Δεν αλλάζουμε καθόλου JS/HTML δομή (παραμένει <table><tr><td>) — απλά
+   "ξαναζωγραφίζουμε" τα ίδια στοιχεία σαν στοιβαγμένες κάρτες, κάτι πολύ
+   πιο φιλικό στο άγγιγμα από πυκνούς πίνακες. Στο desktop media query
+   ξαναγίνονται κανονικός πίνακας.
+   ========================================================================= */
+table{ width:100%; border-collapse: collapse; }
+.panel thead{ display:none; } /* οι επικεφαλίδες στηλών δεν χρειάζονται σε κάρτα */
+.panel table, .panel tbody, .panel tr{ display:block; width:100%; }
+.panel tbody tr{
+  display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  cursor:pointer; transition: background .1s;
+}
+.panel tbody tr:last-child{ border-bottom:none; }
+.panel tbody tr:active{ background: var(--bg-hover); }
+.panel td{
+  display:inline-flex; align-items:center;
+  padding:0; border:none; font-size: 12.6px;
+}
+/* το κύριο "τίτλος + υπότιτλος" cell πιάνει πάντα ολόκληρη τη γραμμή */
+.panel td:has(.row-title), .panel td:has(.row-sub){
+  display:block; width:100%;
+}
+.panel td.num{ font-family: var(--font-mono); font-weight:600; }
+.panel td.mono{ font-family: var(--font-mono); color: var(--text-dim); }
+.panel td:empty{ display:none; }
+/* checkbox + επόμενο cell (π.χ. σε tasks) μένουν στην ίδια γραμμή */
+.panel td:has(input[type=checkbox]){ width:auto; margin-right:2px; }
+.panel td:has(input[type=checkbox]) + td{ width:calc(100% - 34px); }
+/* μικρές ετικέτες πεδίου (π.χ. "Έσοδα", "Λήξη") — ορατές μόνο σε κάρτα,
+   βοηθούν όταν σε μια γραμμή υπάρχουν πολλοί αριθμοί/ημερομηνίες μαζί */
+.cell-label{
+  font-family: var(--font-mono); font-size:9.5px; text-transform:uppercase;
+  letter-spacing:0.5px; color: var(--text-faint); margin-right:5px;
+}
+.row-title{ font-weight:500; font-size:13.6px; }
+.row-sub{ font-size:11.3px; color: var(--text-faint); margin-top:2px; }
+
+/* ---------- badges ---------- */
+.badge{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size: 11px; font-family: var(--font-mono);
+  padding: 3px 9px; border-radius: 20px;
+  border: 1px solid var(--border);
+  color: var(--text-dim); white-space:nowrap;
+}
+.badge .bd{ width:6px; height:6px; border-radius:50%; background: currentColor; }
+.badge.amber{ color: var(--amber); border-color: var(--amber-dim); background: rgba(232,163,61,0.08); }
+.badge.teal{ color: var(--teal); border-color: var(--teal-dim); background: rgba(79,176,160,0.08); }
+.badge.coral{ color: var(--coral); border-color: var(--coral-dim); background: rgba(226,105,75,0.08); }
+.badge.blue{ color: var(--blue); border-color: var(--blue-dim); background: rgba(91,141,239,0.08); }
+.badge.grey{ color: var(--text-faint); }
+
+/* ---------- buttons (touch-friendly: min 40px ύψος στόχου αφής) ---------- */
+.btn{
+  display:inline-flex; align-items:center; gap:7px;
+  padding: 10px 16px; border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text); font-size: 13px; font-weight:500;
+  transition: border-color .12s, background .12s;
+  min-height:40px;
+}
+.btn:hover{ border-color: #3A4952; background: var(--bg-hover); }
+.btn-primary{
+  background: var(--amber); border-color: var(--amber); color: #1A1206;
+  font-weight:600;
+}
+.btn-primary:hover{ background: #f0ac4a; }
+.btn-danger{ color: var(--coral); }
+.btn-danger:hover{ border-color: var(--coral); background: rgba(226,105,75,0.08); }
+.btn-ghost{ background:none; border-color: transparent; color: var(--text-dim); }
+.btn-ghost:hover{ background: var(--bg-hover); color: var(--text); }
+.btn-sm{ padding: 7px 12px; font-size: 11.5px; min-height:34px; }
+.icon-btn{
+  width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px; border:1px solid var(--border); background: var(--bg-elevated); color: var(--text-dim);
+}
+.icon-btn:hover{ color: var(--text); border-color:#3A4952; }
+
+/* ---------- tabs (sub-nav within a section) ---------- */
+.tabs{ display:flex; gap:6px; margin-bottom: 16px; border-bottom: 1px solid var(--border-soft); overflow-x:auto; }
+.tab{
+  padding: 10px 4px; margin-bottom:-1px;
+  font-size: 13px; color: var(--text-faint);
+  border-bottom: 2px solid transparent;
+  cursor:pointer; font-weight:500; margin-right: 16px;
+  white-space:nowrap; min-height:40px; display:flex; align-items:center;
+}
+.tab:hover{ color: var(--text-dim); }
+.tab.active{ color: var(--text); border-bottom-color: var(--amber); }
+
+/* ---------- toolbar ---------- */
+.toolbar{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom: 14px; gap:10px; }
+.toolbar .stats{ font-size:12px; color: var(--text-faint); font-family: var(--font-mono); }
+.search-input{
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius:8px; padding: 9px 12px; color: var(--text); width: 100%;
+  min-height:40px;
+}
+.search-input:focus{ outline:none; border-color: var(--amber); }
+
+/* ---------- progress ---------- */
+.progress-track{
+  height: 6px; background: var(--bg); border-radius: 4px; overflow:hidden;
+  border: 1px solid var(--border-soft);
+}
+.progress-fill{ height:100%; background: var(--teal); border-radius:4px; }
+.progress-fill.over{ background: var(--amber); }
+
+/* =========================================================================
+   MODAL — mobile: bottom sheet σε όλο το πλάτος (native feel).
+   Desktop: κεντραρισμένο παράθυρο (βλ. media query στο τέλος).
+   ========================================================================= */
+.modal-backdrop{
+  position: fixed; inset:0; background: rgba(6,9,10,0.72);
+  display:flex; align-items:flex-end; justify-content:center;
+  z-index:100; overflow-y:auto;
+  backdrop-filter: blur(2px);
+}
+.modal{
+  background: var(--bg-panel); border:1px solid var(--border); border-bottom:none;
+  border-radius: 16px 16px 0 0; width: 100%; max-width: 100%;
+  box-shadow: 0 -20px 60px rgba(0,0,0,0.5);
+  max-height: 92vh; display:flex; flex-direction:column;
+}
+.modal-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 14px 18px; border-bottom:1px solid var(--border-soft);
+  flex-shrink:0;
+}
+.modal-head h3{ font-family: var(--font-display); font-size:15.5px; font-weight:600; }
+.modal-close{ background:none; border:none; color: var(--text-faint); font-size:20px; line-height:1; padding:6px; }
+.modal-close:hover{ color: var(--text); }
+.modal-body{ padding: 16px 18px; overflow-y:auto; flex:1; }
+.modal-foot{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 12px 18px calc(12px + var(--safe-b)) 18px; border-top:1px solid var(--border-soft);
+  flex-shrink:0; gap:8px;
+}
+
+.field{ margin-bottom: 14px; }
+.field label{
+  display:block; font-size: 11.5px; color: var(--text-faint);
+  margin-bottom: 5px; font-family: var(--font-mono); letter-spacing:0.3px;
+}
+.field input[type=text], .field input[type=number], .field input[type=date],
+.field input[type=datetime-local], .field input[type=email], .field input[type=tel],
+.field select, .field textarea{
+  width:100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; color: var(--text);
+  min-height:42px;
+}
+.field textarea{ resize: vertical; min-height: 64px; }
+.field input:focus, .field select:focus, .field textarea:focus{
+  outline:none; border-color: var(--amber);
+}
+.field-row{ display:grid; grid-template-columns: 1fr; gap: 12px; }
+.field-check{ display:flex; align-items:center; gap:8px; min-height:40px; }
+.field-check input{ width:auto; }
+.field-check label{ margin:0; color: var(--text); font-family: var(--font-body); font-size:13px; }
+
+/* checklist widget */
+.checklist-item{ display:flex; align-items:center; gap:10px; padding:7px 0; }
+.checklist-item input[type=checkbox]{ width:19px; height:19px; accent-color: var(--teal); }
+.checklist-item span{ flex:1; font-size:13.5px; }
+.checklist-item span.done{ text-decoration: line-through; color: var(--text-faint); }
+.checklist-item button{ background:none; border:none; color: var(--text-faint); font-size:16px; padding:4px 8px; }
+.checklist-item button:hover{ color: var(--coral); }
+.checklist-add{ display:flex; gap:8px; margin-top:8px; }
+.checklist-add input{ flex:1; background: var(--bg); border:1px solid var(--border); border-radius:8px; padding:9px 11px; color:var(--text); min-height:40px; }
+
+/* empty state */
+.empty-state{
+  text-align:center; padding: 44px 20px; color: var(--text-faint);
+}
+.empty-state .es-ico{ font-family: var(--font-mono); font-size: 22px; color: var(--text-faint); margin-bottom:10px; }
+.empty-state p{ font-size:13px; margin-bottom:14px; }
+
+/* toast — στο mobile κεντραρισμένο πάνω από το bottom nav */
+#toast-host{
+  position:fixed; left:12px; right:12px; bottom: calc(var(--bottom-nav-h) + var(--safe-b) + 12px);
+  z-index:200; display:flex; flex-direction:column; gap:8px; align-items:center;
+}
+.toast{
+  background: var(--bg-elevated); border:1px solid var(--border); border-left:3px solid var(--teal);
+  color: var(--text); padding: 11px 16px; border-radius:8px; font-size:12.8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  animation: toastin .18s ease-out;
+  max-width: 480px; width:100%;
+}
+.toast.err{ border-left-color: var(--coral); }
+@keyframes toastin{ from{ opacity:0; transform: translateY(8px);} to{opacity:1; transform:translateY(0);} }
+
+/* detail drawer */
+.kv{ display:grid; grid-template-columns: 110px 1fr; gap: 8px 12px; font-size:13px; margin-bottom:4px; }
+.kv dt{ color: var(--text-faint); font-family: var(--font-mono); font-size:11px; padding-top:2px; }
+.kv dd{ color: var(--text); }
+.section-title{
+  font-family: var(--font-mono); font-size:10.5px; color: var(--text-faint);
+  text-transform:uppercase; letter-spacing:1px; margin: 16px 0 8px 0;
+}
+.section-title:first-child{ margin-top:0; }
+.prose{ font-size:13px; color: var(--text-dim); white-space:pre-wrap; line-height:1.6; }
+
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background: transparent; }
+::-webkit-scrollbar-thumb{ background: var(--border); border-radius:6px; }
+::-webkit-scrollbar-thumb:hover{ background: #3A4952; }
+
+.owner-hero{
+  display:flex; align-items:center; gap:16px; padding: 4px 0 18px 0;
+}
+.owner-hero .avatar{
+  width:52px; height:52px; border-radius:12px; background: var(--bg-elevated);
+  border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-display); font-size:20px; font-weight:700; color: var(--amber);
+  flex-shrink:0;
+}
+.owner-hero h2{ font-family: var(--font-display); font-size:19px; }
+.owner-hero .sub{ color: var(--text-faint); font-size:12.5px; margin-top:2px; }
+
+/* ---------- loading splash (πριν φορτώσει το IndexedDB) ---------- */
+.boot-splash{
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:10px; color: var(--text-faint); font-family: var(--font-mono); font-size:12px;
+  letter-spacing:0.5px; text-transform:uppercase;
+}
+
+/* =========================================================================
+   DESKTOP / TABLET ENHANCEMENT — από εδώ και πάνω (min-width) ξαναφέρνουμε
+   το sidebar-layout, τους κανονικούς πίνακες, και το κεντραρισμένο modal.
+   ========================================================================= */
+@media (min-width: 860px){
+  #app{ flex-direction:row; }
+  .sidebar{
+    display:flex; width:232px; height:100vh;
+  }
+  .bottom-nav, .more-sheet-backdrop{ display:none; }
+  .content{ padding: 24px 28px 60px 28px; }
+  .topbar{ padding: 16px 28px; }
+  .topbar h1{ font-size:20px; }
+  .topbar .breadcrumb{ font-size:11px; }
+  .clock{ font-size:12px; }
+  .hud{ grid-template-columns: repeat(4, 1fr); margin-bottom:22px; }
+  .hud-cell{ padding:16px 18px; }
+  .hud-cell .hv{ font-size:26px; }
+  .hud-cell .hs{ font-size:11px; }
+  .grid2{ grid-template-columns: 1.3fr 1fr; gap:20px; }
+  .grid3{ grid-template-columns: repeat(3,1fr); gap:20px; }
+  .panel{ margin-bottom:20px; }
+  .panel-head{ padding:13px 18px; }
+  .panel-head h2{ font-size:15px; }
+  .panel-body.pad{ padding:16px 18px; }
+
+  /* πίνακες ξαναγίνονται πραγματικοί πίνακες */
+  .panel thead{ display:table-header-group; }
+  .panel table, .panel tbody, .panel tr{ display: revert; width:auto; }
+  thead th{
+    text-align:left; font-size: 10.5px; color: var(--text-faint);
+    font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.6px;
+    padding: 9px 18px; border-bottom: 1px solid var(--border-soft);
+    font-weight:500;
+  }
+  .panel tbody tr{
+    display:table-row; padding:0; gap:0;
+  }
+  .panel tbody tr:active{ background: none; }
+  .panel tbody tr:hover{ background: var(--bg-hover); }
+  .panel td{
+    display:table-cell; padding: 11px 18px; border-bottom: 1px solid var(--border-soft);
+    font-size: 13px; vertical-align: middle;
+  }
+  .panel td:has(input[type=checkbox]){ width:26px; }
+  .panel td:has(input[type=checkbox]) + td{ width:auto; }
+  td.num, th.num{ text-align:right; }
+  .cell-label{ display:none; } /* οι στήλες desktop έχουν ήδη <th> επικεφαλίδα */
+  .row-title{ font-size:13px; }
+
+  .btn{ min-height:auto; padding: 8px 14px; }
+  .btn-sm{ min-height:auto; padding: 5px 10px; }
+  .icon-btn{ width:30px; height:30px; }
+  .search-input{ width:220px; min-height:auto; padding:7px 11px; }
+  .tab{ min-height:auto; padding: 9px 4px; }
+  .field input, .field select, .field textarea{ min-height:auto; padding:9px 11px; }
+  .field-row, .modal-body .field-row{ grid-template-columns: 1fr 1fr; }
+
+  .modal-backdrop{ align-items:flex-start; padding: 5vh 20px; }
+  .modal{
+    border-radius:12px; border-bottom:1px solid var(--border);
+    width:560px; max-height:none; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-body{ max-height:68vh; }
+  .modal-foot{ padding: 14px 20px; }
+
+  #toast-host{ left:auto; right:22px; bottom:22px; align-items:flex-end; }
+}
