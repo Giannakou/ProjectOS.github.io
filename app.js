@@ -1638,19 +1638,16 @@ function viewSettings(){
   return `
     <div class="grid2">
       <div class="panel">
-        <div class="panel-head"><h2>👤 Owner</h2></div>
-        <div class="panel-body pad">
-          <div class="owner-hero">
-            <div class="avatar">${esc((o.name||'?').slice(0,1).toUpperCase())}</div>
-            <div><h2>${esc(o.name||'—')}</h2><div class="sub">${esc(o.working_hours_start||'—')}–${esc(o.working_hours_end||'—')} ώρες εργασίας</div></div>
-          </div>
-          <div class="section-title">Προτεραιότητες</div>
-          <div class="prose">${esc(o.priorities || '—')}</div>
-          <div class="section-title">Τρέχουσα εστίαση</div>
-          <div class="prose">${esc(o.current_focus || '—')}</div>
-          <div style="margin-top:16px;"><button class="btn btn-sm" id="edit-owner-btn">Επεξεργασία</button></div>
-        </div>
-      </div>
+  <div class="panel-head"><h2>💾 Data Backup</h2></div>
+  <div class="panel-body pad">
+    <p class="row-sub" style="margin-bottom: 12px;">Αποθήκευσε τα δεδομένα σου τοπικά ή επανάφερέ τα από προηγούμενο backup.</p>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-primary btn-sm" id="btn-export">Εξαγωγή (Download)</button>
+      <button class="btn btn-ghost btn-sm" id="btn-import-trigger">Εισαγωγή (Upload)</button>
+      <input type="file" id="file-import" style="display:none" accept=".json">
+    </div>
+  </div>
+</div>
       <div class="panel">
         <div class="panel-head"><h2>🏢 Business</h2></div>
         <div class="panel-body pad">
@@ -1793,6 +1790,14 @@ function bindViewEvents(){
   if(eo) eo.addEventListener('click', ()=> openSingletonModal('owner'));
   const eb = document.getElementById('edit-business-btn');
   if(eb) eb.addEventListener('click', ()=> openSingletonModal('business'));
+const btnExp = document.getElementById('btn-export');
+if(btnExp) btnExp.addEventListener('click', exportData);
+
+const btnImpTrig = document.getElementById('btn-import-trigger');
+if(btnImpTrig) btnImpTrig.addEventListener('click', () => document.getElementById('file-import').click());
+
+const fileImp = document.getElementById('file-import');
+if(fileImp) fileImp.addEventListener('change', importData);
 }
 
 /* map plural add-buttons (state array keys) to schema keys */
