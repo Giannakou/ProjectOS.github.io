@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<!-- viewport-fit=cover: αφήνει το app να "ζωγραφίζει" πίσω από τις safe-areas
+     (π.χ. το notch/home-indicator στο iPhone) ώστε το bottom nav να καλύπτει
+     ολόκληρο το κάτω μέρος της οθόνης, με το padding να διαχειρίζεται η CSS
+     μέσω env(safe-area-inset-bottom). -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1316">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ProjectOS">
+<meta name="description" content="ProjectOS — Owner Cockpit: έργα, εργασίες, πελάτες και χρήματα, χωρίς server, χωρίς λογαριασμό.">
+<title>ProjectOS</title>
+<link rel="stylesheet" href="styles.css">
+<!-- PWA: manifest + εικονίδια, ώστε η εφαρμογή να είναι "installable" και
+     να λειτουργεί πλήρως offline μετά την πρώτη φόρτωση (βλ. service-worker.js). -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+<!-- Το #app γεμίζει δυναμικά από τη render() στο app.js.
+     Μέχρι να φορτώσει η κατάσταση (συνδεδεμένο αρχείο / cache ασφαλείας /
+     demo δεδομένα) δείχνουμε ένα απλό μήνυμα φόρτωσης, ώστε να μη φαίνεται
+     άδεια/σπασμένη σελίδα στο πρώτο άνοιγμα. -->
+<div id="app"><div class="boot-splash">Φόρτωση ProjectOS…</div></div>
+<div id="toast-host"></div>
+<script src="app.js"></script>
+</body>
+</html>
