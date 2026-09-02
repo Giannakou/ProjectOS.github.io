@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<!-- viewport-fit=cover: αφήνει το app να "ζωγραφίζει" πίσω από τις safe-areas
+     (π.χ. το notch/home-indicator στο iPhone) ώστε το bottom nav να καλύπτει
+     ολόκληρο το κάτω μέρος της οθόνης, με το padding να διαχειρίζεται η CSS
+     μέσω env(safe-area-inset-bottom). -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0D1117">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>BusinessOS — Owner Cockpit</title>
+<!-- Θέτει το data-theme στο <html> ΠΡΙΝ φορτώσει/αποδοθεί το CSS, ώστε να
+     μην αναβοσβήνει η οθόνη με το "λάθος" θέμα για μια στιγμή (FOUC).
+     Η προτίμηση θέματος είναι η ΜΟΝΗ εξαίρεση στο "no localStorage" της
+     εφαρμογής: είναι απλώς προτίμηση εμφάνισης UI, όχι δεδομένα επιχείρησης. -->
+<script>
+(function(){
+  try{
+    var saved = localStorage.getItem('businessos-theme');
+    document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
+  }catch(e){
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+</script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- Το #app γεμίζει δυναμικά από τη render() στο app.js.
+     Μέχρι να φορτώσει το IndexedDB δείχνουμε ένα απλό μήνυμα φόρτωσης,
+     ώστε να μη φαίνεται άδεια/σπασμένη σελίδα στο πρώτο άνοιγμα. -->
+<div id="app"><div class="boot-splash">Φόρτωση BusinessOS…</div></div>
+<div id="toast-host"></div>
+<script src="app.js"></script>
+</body>
+</html>
